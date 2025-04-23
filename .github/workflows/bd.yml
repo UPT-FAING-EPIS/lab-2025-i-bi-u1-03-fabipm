@@ -38,6 +38,8 @@ jobs:
       run: terraform apply -auto-approve
 
     # 5. Login en Azure CLI
+
+    
     - name: Azure Login
       run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
 
