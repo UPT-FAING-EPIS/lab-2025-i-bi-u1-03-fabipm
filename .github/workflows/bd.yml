@@ -49,8 +49,8 @@ jobs:
         # Actualizar el repositorio de Microsoft y agregar la clave
         curl https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
 
-        # Agregar el repositorio de Microsoft para Ubuntu 24.04
-        sudo curl https://packages.microsoft.com/config/ubuntu/24.04/prod.list | sudo tee /etc/apt/sources.list.d/microsoft-prod.list
+        # Agregar el repositorio de Microsoft para Ubuntu 22.04 (que es la base para 'ubuntu-latest')
+        sudo curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/microsoft-prod.list
 
         # Actualizar los repositorios
         sudo apt-get update
