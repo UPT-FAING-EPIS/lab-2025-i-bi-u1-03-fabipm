@@ -44,12 +44,21 @@ jobs:
       run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
 
     # 6. Instalar sqlcmd
+    # 6. Instalar sqlcmd
     - name: Install sqlcmd
       run: |
+        # Actualizar el repositorio de Microsoft y agregar la clave
+        curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+        sudo add-apt-repository "$(curl https://packages.microsoft.com/config/ubuntu/24.04/prod.list)"
+
+        # Actualizar los repositorios e instalar mssql-tools
         sudo apt-get update
         sudo ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev
+
+        # Agregar mssql-tools al PATH
         echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
         source ~/.bashrc
+
 
     # 7. Restaurar base de datos usando restore.sql
     - name: Run SQL script to restore DB
