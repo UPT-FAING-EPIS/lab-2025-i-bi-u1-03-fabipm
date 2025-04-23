@@ -62,8 +62,6 @@ jobs:
         echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
         source ~/.bashrc
 
-
-
     # 7. Restaurar base de datos usando restore.sql
     - name: Run SQL script to restore DB
       run: |
