@@ -1,0 +1,61 @@
+name: Deploy Azure SQL DB with Terraform and Restore
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Clonar el repo
+    - name: Checkout repo
+      uses: actions/checkout@v2
+
+    # 2. Configurar Terraform
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: "1.4.6"
+
+    # 3. Exportar credenciales de Azure para Terraform
+    - name: Set Azure Credentials
+      run: echo "Credenciales listas"
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    # 4. Ir a la carpeta infra
+    - name: Terraform Init
+      working-directory: ./infra
+      run: terraform init
+
+    - name: Terraform Apply
+      working-directory: ./infra
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      run: terraform apply -auto-approve
+
+    # 5. Login en Azure CLI
+    - name: Azure Login
+      run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+    # 6. Instalar sqlcmd
+    - name: Install sqlcmd
+      run: |
+        sudo apt-get update
+        sudo ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev
+        echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
+        source ~/.bashrc
+
+    # 7. Restaurar base de datos usando restore.sql
+    - name: Run SQL script to restore DB
+      run: |
+        /opt/mssql-tools/bin/sqlcmd -S tcp:${{ secrets.SQL_SERVER_NAME }}.database.windows.net -d ${{ secrets.DATABASE_NAME }} -U ${{ secrets.SQL_ADMIN }} -P "${{ secrets.SQL_PASSWORD }}" -i ./scripts/restore.sql
