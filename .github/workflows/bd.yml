@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     # 1. Clonar el repo
@@ -46,19 +46,17 @@ jobs:
     # 6. Instalar sqlcmd
     - name: Install sqlcmd
       run: |
-        # Actualizar el repositorio de Microsoft y agregar la clave
-        curl https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
+        # Descargar clave de Microsoft
+        curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
 
-        # Agregar el repositorio de Microsoft para Ubuntu 24.04
-        sudo curl https://packages.microsoft.com/config/ubuntu/24.04/prod.list | sudo tee /etc/apt/sources.list.d/microsoft-prod.list
+        # Configurar repositorio para Ubuntu 20.04 (no 24.04)
+        sudo add-apt-repository "$(curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list)"
 
-        # Actualizar los repositorios
+        # Instalar dependencias
         sudo apt-get update
-
-        # Instalar mssql-tools y dependencias
         sudo ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev
 
-        # Agregar mssql-tools al PATH
+        # Agregar al PATH
         echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
         source ~/.bashrc
 
