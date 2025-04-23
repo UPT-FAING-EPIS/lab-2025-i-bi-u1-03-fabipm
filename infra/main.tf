@@ -8,38 +8,32 @@ terraform {
   required_version = ">= 1.1.0"
 }
 
-
 provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "example" {
-  name     = "recursosLab03"
-  location = "westus2"
+# Referenciamos el grupo de recursos ya existente
+data "azurerm_resource_group" "example" {
+  name = "recursosLab03"
 }
 
-resource "azurerm_mssql_server" "example" {
-  name                         = "serverlab03"
-  location                     = azurerm_resource_group.example.location
-  resource_group_name          = azurerm_resource_group.example.name
-  version                      = "12.0"
-  administrator_login          = "fabiola"
-  administrator_login_password = "#050.Ada0"
+# Referenciamos el servidor SQL ya existente
+data "azurerm_mssql_server" "example" {
+  name                = "serverlab03"
+  resource_group_name = data.azurerm_resource_group.example.name
 }
 
-
+# Creamos la base de datos (si aún no existe)
 resource "azurerm_mssql_database" "example" {
   name      = "bdlab03"
-  server_id = azurerm_mssql_server.example.id
+  server_id = data.azurerm_mssql_server.example.id
   sku_name  = "Basic"
-  depends_on = [
-    azurerm_mssql_server.example]
 }
 
-
+# Creamos la regla de firewall (si aún no existe)
 resource "azurerm_mssql_firewall_rule" "allow_my_ip" {
-  name                = "AllowMyIP"
-  server_id           = azurerm_mssql_server.example.id
-  start_ip_address    = "38.250.158.150"
-  end_ip_address      = "38.250.158.150"
+  name             = "AllowMyIP"
+  server_id        = data.azurerm_mssql_server.example.id
+  start_ip_address = "38.250.158.150"
+  end_ip_address   = "38.250.158.150"
 }
