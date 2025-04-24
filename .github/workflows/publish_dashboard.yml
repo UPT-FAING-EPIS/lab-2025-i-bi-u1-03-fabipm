@@ -1,0 +1,32 @@
+name: Publish Power BI Dashboard
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  Deploy-Asset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v12
+        with:
+          separator: ","
+          quotepath: false
+
+      - name: Power BI Pipeline Deploy
+        uses: nathangiusti/Power-BI-Pipeline-Deploy@v2.5
+        with:
+          files: ${{ steps.changed-files.outputs.all_modified_files }}
+          separator: ","
+          tenant_id: "${{ secrets.AZURE_TENANT_ID }}"
+          config_file: ".github/config/pipeline-deploy-config.yaml"
+        env:
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
