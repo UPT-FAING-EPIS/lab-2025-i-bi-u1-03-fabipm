@@ -20,7 +20,7 @@ jobs:
           separator: ","
           quotepath: false
 
-      - name: Power BI Pipeline Deploy
+      - name: power BI Pipeline Deploy
         uses: nathangiusti/Power-BI-Pipeline-Deploy@v2.5
         with:
           files: ${{ steps.changed-files.outputs.all_modified_files }}
